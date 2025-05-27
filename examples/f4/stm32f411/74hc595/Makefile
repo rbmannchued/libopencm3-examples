@@ -2,7 +2,7 @@ PROJECT = main
 BUILD_DIR = bin
 
 #SHARED_DIR = ../my-common-code
-CFILES = usbcdc.c
+CFILES = 74hc595.c
 
 DEVICE=stm32f411ce
 OOCD_FILE = board/stm32f4discovery.cfg
