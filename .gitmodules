@@ -1,3 +1,6 @@
 [submodule "libopencm3"]
 	path = libopencm3
 	url = https://github.com/libopencm3/libopencm3
+[submodule "examples/f4/stm32f411/i2c_oled/ssd1306-libopencm3"]
+	path = examples/f4/stm32f411/i2c_oled/ssd1306-libopencm3
+	url = https://github.com/rbmannchued/ssd1306-libopencm3.git
