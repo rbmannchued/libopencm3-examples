@@ -1,8 +1,7 @@
-# 74hc595
+# button
 
-Example for using 74hc595
+Example for using a button to light a led
 ```
-SER > PB12
-RCLK
-SRCLK
+button > PB2
+led > builtin pc13 led
 ```
