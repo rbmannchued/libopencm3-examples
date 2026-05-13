@@ -1,16 +1,16 @@
 PROJECT = main
 BUILD_DIR = bin
 
-#SHARED_DIR = ../my-common-code
-CFILES = octocoupler-switch.c
+CFILES = dac1334.c
 
-DEVICE=stm32f103c8t6
-OOCD_FILE = boaryd/stm32f4discovery.cfg
+DEVICE = stm32f411ce
+OOCD_FILE = board/stm32f4discovery.cfg
+
+LDLIBS += -lm
 
 # You shouldn't have to edit anything below here.
-VPATH += $(SHARED_DIR)
-INCLUDES += $(patsubst %,-I%, . $(SHARED_DIR))
-OPENCM3_DIR=../../../../libopencm3
+INCLUDES += $(patsubst %,-I%, .)
+OPENCM3_DIR = ../../../../libopencm3
 
 include $(OPENCM3_DIR)/mk/genlink-config.mk
 include ../../../../rules.mk
