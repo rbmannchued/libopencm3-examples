@@ -16,5 +16,13 @@ include $(OPENCM3_DIR)/mk/genlink-config.mk
 include ../../../../rules.mk
 include $(OPENCM3_DIR)/mk/genlink-rules.mk
 
+fir_gen: fir_coeffs.c
+	gcc -o fir_gen fir_coeffs.c -lm
+
+fir_coeffs.h: fir_gen
+	./fir_gen
+
+$(BUILD_DIR)/dac1334.o: fir_coeffs.h
+
 flashbin:
 	st-flash write main.bin 0x8000000
