@@ -1,7 +1,7 @@
 PROJECT = main
 BUILD_DIR = bin
 
-CFILES = dac1334.c
+CFILES = i2s-dac.c
 
 DEVICE = stm32f411ce
 OOCD_FILE = board/stm32f4discovery.cfg
