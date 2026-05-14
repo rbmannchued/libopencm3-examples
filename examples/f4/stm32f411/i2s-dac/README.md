@@ -13,3 +13,9 @@ RIGHT Channel. A Low Pass FIR filter is applied in the RIGHT Channel.
 
 ```
 you can edit the cutoff frequency of the FIR filter in ```filter_coeffs.c```, build the firmware running ```make``` and flashing ```make flashbin```
+
+RESULT:
+
+<p align="center">
+  <img src="../../../../img/i2s-dac-scope.jpg" width="600" alt="scope result">
+</p>
