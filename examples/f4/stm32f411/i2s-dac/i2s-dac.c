@@ -14,7 +14,6 @@
  *   PLLI2SN=271, PLLI2SR=2 > I2SCLK = 135.5 MHz
  *   I2SDIV=6, ODD=0         > FS = 135.5e6/(256*12) ≈ 44108 Hz
  *
- * Gera um tom de 441 Hz (seno) nos dois canais estéreo.
  */
 
 #include <libopencm3/stm32/rcc.h>
