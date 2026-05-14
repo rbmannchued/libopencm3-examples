@@ -20,16 +20,23 @@
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/spi.h>
+
 #define _USE_MATH_DEFINES
+
 #include <math.h>
 #include <stdint.h>
+
+#include "fir_coeffs.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f
 #endif
 
 #define SAMPLE_RATE   44100
+#define NPOINTS       4096
 
+int16_t buffer[NPOINTS];
+int16_t buffer_fir[NPOINTS] = {0};
 
 /* ------------------------------------------------------------------ */
 static void clock_setup(void)
@@ -86,9 +93,9 @@ static void i2s2_setup(void)
      *   CHLEN  = 0        > frame de canal 16 bits
      */
     SPI2_I2SCFGR = SPI_I2SCFGR_I2SMOD
-                 | (SPI_I2SCFGR_I2SCFG_MASTER_TRANSMIT << SPI_I2SCFGR_I2SCFG_LSB)
-                 | (SPI_I2SCFGR_I2SSTD_I2S_PHILIPS     << SPI_I2SCFGR_I2SSTD_LSB)
-                 | (SPI_I2SCFGR_DATLEN_16BIT            << SPI_I2SCFGR_DATLEN_LSB);
+	| (SPI_I2SCFGR_I2SCFG_MASTER_TRANSMIT << SPI_I2SCFGR_I2SCFG_LSB)
+	| (SPI_I2SCFGR_I2SSTD_I2S_PHILIPS     << SPI_I2SCFGR_I2SSTD_LSB)
+	| (SPI_I2SCFGR_DATLEN_16BIT            << SPI_I2SCFGR_DATLEN_LSB);
 
     /*
      * I2SPR com MCLK habilitado (MCKOE=1), I2SCLK = 135.5 MHz:
@@ -120,25 +127,46 @@ static void i2s2_send(int16_t left, int16_t right)
     SPI2_DR = (uint16_t)right;
 }
 
-/* ------------------------------------------------------------------ */
-  int main(void)
-  {
-      const float freqs[4] = {65.40f, 82.40f, 195.99f, 523.25f};
-      const float amp = 32767.0f / 4.0f;
-      uint32_t idx = 0;
+void generate_signal(void){
+    const float freqs[4] = {261.62f, 329.62f, 391.99f, 2093.00f};
+    const float amp = 32767.0f / 4.0f;
 
-      clock_setup();
-      i2s2_setup();
+    for(int i = 0; i < NPOINTS; i++){
+	float sum = 0;
+	for(int k = 0; k < 4; k++){
+	    sum += sinf(2.0f * M_PI * freqs[k] * i / SAMPLE_RATE);
+	}
+	buffer[i] = (int16_t)(sum * amp);
+    }
 
-      while (1) {
-          float sum = 0.0f;
-          for (int k = 0; k < 4; k++)
-              sum += sinf(2.0f * M_PI * freqs[k] * idx / SAMPLE_RATE);
+}
 
-          int16_t sample = (int16_t)(amp * sum);
-          i2s2_send(sample, sample);
+void generate_fir_filter(int16_t *input_buffer, int16_t *output_buffer, size_t npoints){
+    
+    for(int j = 0; j < npoints; j++){
+	float sum = 0.0f;
+	for(int k = 0; k < FIR_TAP_NUM; k++){
+	    if(j >= k){
+		sum += fir_coeffs[k] * (float)input_buffer[j - k];
+	    }
+	}
+	output_buffer[j] = (int16_t)sum;
+    }    
+}
 
-          if (++idx >= SAMPLE_RATE)
-              idx = 0;   /* reseta a cada segundo para evitar perda de precisão float */
-      }
-  }
+
+int main(void){
+    uint32_t idx = 0;
+
+    clock_setup();
+    i2s2_setup();
+    generate_signal();
+    generate_fir_filter(buffer, buffer_fir, NPOINTS);
+    while (1) {
+
+	i2s2_send(buffer_fir[idx], buffer[idx]);
+
+	if (++idx >= NPOINTS)
+	    idx = 0;
+    }
+}
