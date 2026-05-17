@@ -20,7 +20,6 @@
 
 volatile uint16_t buffer1[NPOINTS];
 volatile uint16_t buffer2[NPOINTS];
-/* volatile uint16_t *current_buff = buffer1; */
 volatile uint16_t *processing_buff = buffer2;
 
 
@@ -131,23 +130,16 @@ int main(){
 
     ssd1306_Init();
 
-    ssd1306_SetCursor(35,10);
-    ssd1306_WriteString("Hello ", Font_11x18,White);
-    ssd1306_Line(5,32,123,32,White);
-	
-	
-    ssd1306_UpdateScreen();
-	
-   
-
     while(1){
 
 	if (bufferDone) {
 	    bufferDone = false;
 	    ssd1306_Fill(Black);
-	    for (uint8_t x = 0; x < NPOINTS; x++) {
+	    uint8_t y_prev = normalizeToDisplay(processing_buff[0]);
+	    for (uint8_t x = 1; x < NPOINTS; x++) {
 		uint8_t y = normalizeToDisplay(processing_buff[x]);
-		ssd1306_DrawPixel(x, y, White);
+		ssd1306_Line(x - 1, y_prev, x, y, White);
+		y_prev = y;
 	    }
 	    ssd1306_UpdateScreen();
 	}
